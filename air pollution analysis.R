@@ -6,6 +6,7 @@ names(SCC)
 install.packages("dplyr")
 require(dplyr)
 
+## PLOT1.R
 #1) Have total emissions from PM2.5 decreased in the United States from 1999 to 2008? 
 #Using the base plotting system, make a plot showing the total PM2.5 emission from all 
 #sources for each of the years 1999, 2002, 2005, and 2008.
@@ -32,6 +33,7 @@ x1<-barplot(height=annual$Annual.Total/1000, names.arg=annual$year,
 ## Add text at top of bars
 text(x = x1, y = round(annual$Annual.Total/1000,2), label = round(annual$Annual.Total/1000,2), pos = 3, cex = 0.8, col = "black")
 
+## PLOT2.R
 #2)Have total emissions from PM2.5 decreased in the Baltimore City, Maryland (\color{red}
 #{\verb|fips == "24510"|}fips=="24510") from 1999 to 2008? Use the base plotting system
 #to make a plot answering this question.
@@ -58,7 +60,7 @@ x2<-barplot(height=baltimore$Annual.Total/1000, names.arg=baltimore$year,
 ## Add text at top of bars
 text(x = x2, y = round(baltimore$Annual.Total/1000,2), label = round(baltimore$Annual.Total/1000,2), pos = 3, cex = 0.8, col = "black")
 
-
+## PLOT3.R
 #3)Of the four types of sources indicated by the \color{red}{\verb|type|}type 
 #(point, nonpoint, onroad, nonroad) variable, which of these four sources have seen 
 #decreases in emissions from 1999–2008 for Baltimore City? Which have seen increases 
@@ -95,6 +97,7 @@ ggplot(nei.baltimore, aes(x=factor(year), y=Annual.Total, fill=type,label = roun
                                      "City by various source types", sep="")))+
   geom_label(aes(fill = type), colour = "white", fontface = "bold")
 
+## PLOT4.R
 #4) Across the United States, how have emissions from coal combustion-related sources 
 #changed from 1999–2008?
 
@@ -120,6 +123,7 @@ ggplot(nei.coal, aes(x = factor(year), y = Annual.Total, fill = type)) +
   guides(fill = FALSE)
 
 
+## PLOT5.R
 #5) How have emissions from motor vehicle sources changed from 1999–2008 in Baltimore City?
 
 ssc.vehical <- grepl("Mobile.*Vehicles", SCC$EI.Sector)
@@ -146,35 +150,11 @@ ggplot(nei.vehicles, aes(x = factor(year), y = Annual.Total, fill = SCC.Level.Tw
   scale_fill_brewer(palette = "Set1") +
   guides(fill = FALSE)
 
-#Compare emissions from motor vehicle sources in Baltimore City with emissions from 
+## PLOT6.R
+#6) Compare emissions from motor vehicle sources in Baltimore City with emissions from 
 #motor vehicle sources in Los Angeles County, California 
 #(𝚏𝚒𝚙𝚜 == “𝟶𝟼𝟶𝟹𝟽”. Which city has seen greater changes over time in motor
 #vehicle emissions?
-
-
-scc.vehicles <- SCC[grep("Mobile.*Vehicles", SCC$EI.Sector),  ]; # Pattern match mobile vehicles in SCC description
-scc.vehicles.list <- unique(scc.vehicles$SCC); # Create motor vehicle lookup list by SCC
-nei.vehicles <- subset(NEI, SCC %in% scc.vehicles.list); # Filter for motor vehicle sources
-nei.vehicles <- nei.vehicles %>% filter(fips == "24510"| fips == "06037"); # Filter for Baltimore City or Los Angeles County
-nei.vehicles$fips[nei.vehicles$fips == "24510"] <- "Baltimore";
-nei.vehicles$fips[nei.vehicles$fips == "06037"] <- "Los Angeles";
-nei.vehicles <- merge(x = nei.vehicles, y = scc.vehicles[, c("SCC", "SCC.Level.Two")], by = "SCC"); # Join in descriptive data on SCC codes
-nei.vehicles <- nei.vehicles %>% group_by(fips, year, SCC.Level.Two) %>% summarize(Annual.Total = sum(Emissions));
-nei.vehicles.total <- nei.vehicles %>% group_by(fips, year) %>% summarize(Annual.Total = sum(Annual.Total)) %>% mutate(SCC.Level.Two = "Total");
-nei.vehicles <- bind_rows(nei.vehicles, nei.vehicles.total);
-nei.vehicles$SCC.Level.Two <- factor(nei.vehicles$SCC.Level.Two, levels = c("Total", "Highway Vehicles - Diesel", "Highway Vehicles - Gasoline"));
-ggplot(nei.vehicles, aes(x = factor(year), y = Annual.Total, fill = SCC.Level.Two)) +
-  geom_bar(stat = "identity") +
-  facet_grid(fips ~ SCC.Level.Two) + 
-  xlab("Year") +
-  ylab(expression("Total Tons of PM"[2.5]*" Emissions")) + 
-  ggtitle(expression(atop("Total Tons of PM"[2.5]*" Emissions from Motor Vehicle Sources", paste("in Baltimore City, MD and Los Angeles County, CA")))) +
-  theme(plot.title = element_text(hjust = 0.5)) + # Center the plot title
-  theme(plot.margin = unit(c(1,1,1,1), "cm")) + # Adjust plot margins
-  scale_fill_brewer(palette = "Set1") +
-  guides(fill = FALSE)
-
-#or
 
 require(dplyr)
 baltcitymary.emissions<-summarise(group_by(filter(NEI, fips == "24510"& type == 'ON-ROAD'), year), Emissions=sum(Emissions))
